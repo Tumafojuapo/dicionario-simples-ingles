@@ -1,0 +1,73 @@
+import tkinter as tk
+import sqlite3
+import pandas as pd
+
+#Criar a conexão com o banco de dados
+
+conn= sqlite3.connect('dicionario.db')
+cursor = conn.cursor()
+
+#Criar tabela
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS palavras(palavra TEXT,traducao TEXT)''')
+
+#Função para inserir os dados no banco de dados
+
+def inserir_dados():
+    palavra = entrada_palavra.get()
+    traducao = entrada_traducao.get()
+    cursor.execute("INSERT INTO palavras VALUES (?,?)",(palavra,traducao))
+    conn.commit()
+#Limpar os campos após inserção
+    entrada_palavra.delete(0,'end')
+    entrada_traducao.delete(0,'end')
+
+# Função para exportar os dados para uma planilha
+
+def exportar_para_excel():
+    cursor.execute("SELECT * FROM palavras")
+    dados= cursor.fetchall()
+    df= pd.DataFrame(dados,columns=['Palavra','Traducao'])
+    df.to_excel('dicionario.xlsx',index=False)
+
+# Criar a Janela Principal
+
+janela = tk.Tk()
+janela.title("Dicionario Simples")
+janela.geometry("500x300")
+janela.resizable(False,False)
+
+#Criar os labels e campos de entrada
+
+label_palavra = tk.Label(janela,text="Palavra:",font=("Arial",20))
+label_palavra.pack()
+entrada_palavra =tk.Entry(janela)
+entrada_palavra.pack()
+
+label_traducao = tk.Label(janela,text="Traducao",font=("Arial",20))
+label_traducao.pack()
+entrada_traducao = tk.Entry(janela)
+entrada_traducao.pack()
+
+#Criar botão para inserir dados
+
+botao_inserir = tk.Button(janela,text="Inserir",command=inserir_dados)
+botao_inserir.pack()
+
+#Criar botão para exportar para Excel
+
+botao_exportar =tk.Button(janela,text="Exportar para Excel",command=exportar_para_excel)
+botao_exportar.pack()
+
+# Iniciar o Loop Principal da Interface
+
+janela.mainloop()
+
+#Fechar a conexão com o banco de dados
+
+conn.close()
+
+
+
+
+
